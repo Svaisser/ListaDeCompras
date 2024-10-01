@@ -1,0 +1,38 @@
+[
+  {
+    "item": "Chocolate",
+    "quantia": 1
+  },
+  {
+    "item": "Massa",
+    "quantia": 3
+  },
+  {
+    "item": "Leite",
+    "quantia": 5
+  },
+  {
+    "item": "Arroz",
+    "quantia": 2
+  },
+  {
+    "item": "Feijão",
+    "quantia": 4
+  },
+  {
+    "item": "Ovos",
+    "quantia": 6
+  },
+  {
+    "item": "Pão",
+    "quantia": 1
+  },
+  {
+    "item": "Café",
+    "quantia": 2
+  },
+  {
+    "item": "Macarrão",
+    "quantia": 6
+  }
+]
