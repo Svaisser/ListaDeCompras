@@ -1,15 +1,7 @@
 [
   {
-    "item": "Chocolate",
-    "quantia": 1
-  },
-  {
     "item": "Massa",
     "quantia": 3
-  },
-  {
-    "item": "Leite",
-    "quantia": 5
   },
   {
     "item": "Arroz",
@@ -24,15 +16,16 @@
     "quantia": 6
   },
   {
-    "item": "Pão",
-    "quantia": 1
-  },
-  {
     "item": "Café",
     "quantia": 2
   },
   {
     "item": "Macarrão",
     "quantia": 6
+  },
+  {
+    "item": "Cereal",
+    "quantia": 1,
+    "descricao": "Comprar uma caixa de sucrilhos, e se lembrar 2 litros de leite."
   }
 ]
