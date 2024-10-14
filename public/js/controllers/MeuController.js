@@ -1,6 +1,9 @@
 angular.module('meuApp').controller('MeuController', function ($scope, $http) {
+
   $scope.listaCompras = [];
+  $scope.compraEditando = {};
   $scope.ErroInclusao = '';
+
   $scope.carregarCompras = function () {
     $http(
       {
@@ -10,28 +13,43 @@ angular.module('meuApp').controller('MeuController', function ($scope, $http) {
         $scope.listaCompras = response.data;
       })
   }
+
   $scope.carregarCompras();
+
+  function getNextId() {
+    if ($scope.listaCompras.length === 0) {
+      return 1;
+    } else {
+      var ids = $scope.listaCompras.map(function (c) { return c.id; }).sort(function (a, b) { return a - b; });
+
+      for (var i = 0; i < ids.length; i++) {
+        if (ids[i] !== i + 1) {
+          return i + 1;
+        }
+      }
+      return ids[ids.length - 1] + 1;
+    }
+  }
+
   $scope.adicionarCompra = function () {
     $scope.ErroInclusao = '';
-    // Campos obrigatórios
+
     var item = $scope.frmCompras.item;
     var quantia = $scope.frmCompras.quantia;
-
-    // Valida se a quantidade é um número inteiro
+    var id = getNextId();
     if (quantia < 1) {
       $scope.ErroInclusao = 'A quantitidade precisa ser no mínimo 1.';
       return;
     }
-    // Verifica se todos os campos estão preenchidos
     if (!item || !quantia) {
       $scope.ErroInclusao = 'Por favor, preencha todos os campos obrigatórios.';
       return;
     }
 
-    // Se passou por todas as validações, prossegue com o cadastro
     $scope.listaCompras.push({
       "item": item,
-      "quantia": quantia
+      "quantia": quantia,
+      "id": id
     });
 
     // Envia os dados para o servidor
@@ -40,26 +58,29 @@ angular.module('meuApp').controller('MeuController', function ($scope, $http) {
       method: 'POST',
       data: {
         "item": item,
-        "quantia": quantia
+        "quantia": quantia,
+        "id": id
       }
     }).then(function (response) {
-      console.log(response.data); // Mensagem de sucesso
+      console.log(response.data);
     }).catch(function (error) {
       $scope.ErroInclusao = 'Erro ao adicionar a compra: ' + error.message;
     });
 
-    // Limpa o formulário após adicionar
     $scope.frmCompras = {
       "item": "",
       "quantia": ""
     };
   };
+
   $scope.mostrarModalConfirmacao = false;
   $scope.itemParaExcluir = null;
+
   $scope.excluirCompra = function (item) {
     $scope.itemParaExcluir = item;
-    $scope.mostrarModalConfirmacao = true; // Mostra o modal
+    $scope.mostrarModalConfirmacao = true; 
   };
+
   $scope.confirmarExclusao = function () {
     $http({
       url: '/deleteCompra',
@@ -67,12 +88,10 @@ angular.module('meuApp').controller('MeuController', function ($scope, $http) {
       headers: { 'Content-Type': 'application/json' },
       data: { item: $scope.itemParaExcluir }
     }).then(function (response) {
-      $scope.carregarCompras();  // Atualiza a lista após exclusão
+      $scope.carregarCompras();
 
-      // Exibe o aviso de exclusão
       $scope.exclusaoAviso = true;
 
-      // Oculta o modal
       $scope.mostrarModalConfirmacao = false;
       $scope.itemParaExcluir = null;
 
@@ -88,48 +107,51 @@ angular.module('meuApp').controller('MeuController', function ($scope, $http) {
       alert($scope.ErroExclusao);
     });
   };
+
   $scope.cancelarExclusao = function () {
-    $scope.mostrarModalConfirmacao = false; // Oculta o modal
+    $scope.mostrarModalConfirmacao = false; 
     $scope.itemParaExcluir = null;
   };
+
   $scope.mostrarDetalhes = false;
+
   $scope.abrirDetalhes = function (compra) {
-    $scope.compraDetalhes = compra; // Define os detalhes da compra
-    $scope.mostrarDetalhes = true; // Exibe o modal
+    $scope.compraDetalhes = angular.copy(compra); 
+    $scope.mostrarDetalhes = true;
   };
+
   $scope.fecharDetalhes = function () {
-    $scope.mostrarDetalhes = false; // Esconde o modal
+    $scope.mostrarDetalhes = false; 
   };
+
   $scope.editarDetalhes = function (compraDetalhes) {
+    var id = compraDetalhes.id;
     var item = compraDetalhes.item;
     var quantia = compraDetalhes.quantia;
     var descricao = compraDetalhes.descricao;
 
-    // Valida se a quantidade é um número inteiro
     if (quantia < 1) {
       $scope.ErroInclusao = 'A quantidade precisa ser no mínimo 1.';
       return;
     }
 
-    // Verifica se todos os campos estão preenchidos
     if (!item || !quantia) {
       $scope.ErroInclusao = 'Por favor, preencha todos os campos obrigatórios.';
       return;
     }
-
-    // Atualiza o item na lista localmente (opcional)
-    var compraIndex = $scope.listaCompras.findIndex(c => c.item === compraDetalhes.item);
+   
+    var compraIndex = $scope.listaCompras.findIndex(c => c.id === id);
     if (compraIndex > -1) {
       $scope.listaCompras[compraIndex] = {
+        id: id,
         item: item,
         quantia: quantia,
         descricao: descricao
       };
     }
 
-    // Fazendo a requisição PUT para atualizar o recurso no servidor
     $http({
-      url: '/updateCompra/' + encodeURIComponent(item),  // URL com o identificador do item
+      url: '/updateCompra/' + id,
       method: 'PUT',
       data: {
         item: item,
@@ -142,19 +164,17 @@ angular.module('meuApp').controller('MeuController', function ($scope, $http) {
       $scope.ErroInclusao = 'Erro ao atualizar a compra: ' + error.message;
     });
 
-    // Fechar o modal após a edição
     $scope.fecharDetalhes();
-
   };
-  $scope.ajustarAltura = function(event) {
+
+
+
+
+  $scope.ajustarAltura = function (event) {
     const element = event.target;
-    
-    // Redefine a altura para o mínimo e depois ajusta
     element.style.height = 'auto';
     element.style.height = (element.styleHeight) + 10;
-    
-    // Ajusta a altura de acordo com o conteúdo
     element.style.height = (element.scrollHeight) + 'px';
   };
-  
+
 });
