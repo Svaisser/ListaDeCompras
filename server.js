@@ -82,11 +82,12 @@ app.delete('/deleteCompra', (req, res) => {
     });
 });
 
-app.put('/updateCompra/:item', (req, res) => {
-    const item = req.params.item; // Pega o item da URL
-    const { quantia, descricao } = req.body; // Pega os dados enviados no corpo da requisição
+app.put('/updateCompra/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const { quantia, descricao, item } = req.body;
 
     // Caminho absoluto para compras.json
+    console.error("O ID do item é ", id);
     const filePath = path.join(__dirname, './public/compras.json');
 
     // Lê o arquivo de compras
@@ -104,38 +105,31 @@ app.put('/updateCompra/:item', (req, res) => {
             return res.status(500).send('Erro ao processar o arquivo');
         }
 
-        // Busca o item na lista de compras
-        const compra = compras.find(c => c.item === item);
+        const compra = compras.find(c => c.id === id);
 
         if (!compra) {
-            // Retorna erro 404 se o item não for encontrado
             return res.status(404).send({ message: 'Compra não encontrada' });
         }
 
-        // Atualiza os detalhes da compra
         compra.quantia = quantia || compra.quantia;
         compra.descricao = descricao || compra.descricao;
+        compra.item = item || compra.item;
 
-        // Escreve a lista de compras atualizada de volta no arquivo
         fs.writeFile(filePath, JSON.stringify(compras, null, 2), (err) => {
             if (err) {
                 console.error('Erro ao escrever no arquivo:', err);
                 return res.status(500).send('Erro ao escrever no arquivo');
             }
 
-            // Retorna a compra atualizada como resposta
             res.send({ message: 'Compra atualizada com sucesso', compra });
         });
     });
 });
 
-
-// Rota para servir a aplicação principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
